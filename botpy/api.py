@@ -248,7 +248,7 @@ class BotAPI:
         )
         return await self._http.request(route, params=params)
     
-        async def get_guild_role_members(
+    async def get_guild_role_members(
             self, guild_id: str, role_id: str, start_index: str = "0", limit: int = 1
     ) -> Dict[str, Union[List[user.Member], str]]:
         """
@@ -532,6 +532,56 @@ class BotAPI:
         payload.pop("self", None)
         payload.pop("img", None)
         route = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
+        return await self._http.request(route, json=payload)
+
+    async def post_group_message(
+        self,
+        group_openid: str,
+        content: str = None,
+        embed: message.Embed = None,
+        ark: message.Ark = None,
+        message_reference: message.Reference = None,
+        image: str = None,
+        file_image: Union[bytes, BinaryIO, str] = None,
+        msg_id: str = None,
+        event_id: str = None,
+        markdown: message.MarkdownPayload = None,
+        keyboard: message.Keyboard = None,
+    ) -> message.Message:
+        """
+        发送消息。
+
+        注意:
+        - 发送成功之后，会触发一个创建消息的事件。
+        - 被动回复消息有效期为 5 分钟
+        - 主动推送消息每日每个子频道限 2 条
+        - 发送消息接口要求机器人接口需要链接到websocket gateway 上保持在线状态
+
+        Args:
+          group_openid (str): 群聊的 openid
+          content (str): 消息的文本内容。
+          embed (message.Embed): embed 消息，一种特殊的 ark
+          ark (message.Ark): ark 模版消息
+          message_reference (message.Reference): 对消息的引用。
+          image (str): 要发送的图像的 URL。
+          file_image (bytes): 要发送的本地图像的本地路径或数据。
+          msg_id (str): 您要回复的消息的 ID。您可以从 AT_CREATE_MESSAGE 事件中获取此 ID。
+          event_id (str): 您要回复的消息的事件 ID。
+          markdown (message.MarkdownPayload): markdown 消息
+          keyboard (message.Keyboard): keyboard 消息
+
+        Returns:
+          message.Message: 一个消息字典对象。
+        """
+        if isinstance(file_image, BufferedReader):
+            file_image = file_image.read()
+        elif isinstance(file_image, str):
+            with open(file_image, "rb") as img:
+                file_image = img.read()
+        payload = locals()
+        payload.pop("self", None)
+        payload.pop("img", None)
+        route = Route("POST", "/v2/groups/{group_openid}/messages", group_openid=group_openid)
         return await self._http.request(route, json=payload)
 
     async def recall_message(self, channel_id: str, message_id: str, hidetip: bool = False) -> str:

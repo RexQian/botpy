@@ -114,6 +114,7 @@ class Intents(BaseFlags):
     message_audit	消息审核事件
     forums	论坛事件 (仅 私域 机器人能够设置此 intents)
     audio_action	音频事件
+    group_at_message 用户在群聊@机器人发送消息
     """
 
     __slots__ = ()
@@ -142,6 +143,7 @@ class Intents(BaseFlags):
         self.public_guild_messages = True
         self.audio_or_live_channel_member = True
         self.open_forum_event = True
+        self.group_at_message = True
         return self
 
     @classmethod
@@ -226,6 +228,16 @@ class Intents(BaseFlags):
 
         """
         return 1 << 12
+
+    @Flag
+    def group_at_message(self):
+        """:class:`bool`: 是否打开群聊@的监听.
+
+        - :func:`on_group_at_message_create`: 用户在群聊@机器人发送消息
+
+        """
+
+        return 1 << 25
 
     @Flag
     def interaction(self):

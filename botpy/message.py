@@ -17,7 +17,9 @@ class Message:
         "seq",
         "seq_in_channel",
         "timestamp",
-        "event_id"
+        "event_id",
+        "group_id",
+        "group_openid"
     )
 
     def __init__(self, api: BotAPI, event_id, data: gateway.MessagePayload):
@@ -37,6 +39,8 @@ class Message:
         self.seq_in_channel = data.get("seq_in_channel", None)  # 子频道消息序号
         self.timestamp = data.get("timestamp", None)
         self.event_id = event_id
+        self.group_id = data.get("group_id", None)
+        self.group_openid = data.get("group_openid", None)
 
     def __repr__(self):
         return str({items: str(getattr(self, items)) for items in self.__slots__ if not items.startswith('_')})
@@ -44,6 +48,7 @@ class Message:
     class _User:
         def __init__(self, data):
             self.id = data.get("id", None)
+            self.member_openid = data.get("member_openid", None)
             self.username = data.get("username", None)
             self.bot = data.get("bot", None)
             self.avatar = data.get("avatar", None)

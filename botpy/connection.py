@@ -160,6 +160,11 @@ class ConnectionState:
         _message = DirectMessage(self.api, payload.get('id', None), payload.get('d', {}))
         self._dispatch("direct_message_delete", _message)
 
+    # botpy.flags.Intents.group_at_message
+    def parse_group_at_message_create(self, payload):
+        _message = Message(self.api, payload.get('id', None), payload.get('d', {}))
+        self._dispatch("group_at_message_create", _message)
+
     # botpy.flags.Intents.interaction
     def parse_interaction_create(self, payload):
         _interaction = Interaction(self.api, payload.get('id', None), payload.get('d', {}))
