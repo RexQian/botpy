@@ -584,6 +584,37 @@ class BotAPI:
         route = Route("POST", "/v2/groups/{group_openid}/messages", group_openid=group_openid)
         return await self._http.request(route, json=payload)
 
+    async def send_group_file(
+        self,
+        group_openid: str,
+        file_type: int,
+        url: str = None,
+        srv_send_msg = True,
+        file_data: Union[bytes, BinaryIO, str] = None,
+    ) -> message.Message:
+        """
+        发送文件。
+
+        Args:
+          group_openid (str): 群聊的 openid
+          file_type (int): 媒体类型：1 图片，2 视频，3 语音，4 文件（暂不开放）资源格式要求图片：png/jpg，视频：mp4，语音：silk
+          url (str): 需要发送媒体资源的url
+          srv_send_msg (bool): 固定是：true
+          file_data (bytes): 要发送的本地图像的本地路径或数据。【暂未支持】
+        Returns:
+          message.Message: 一个消息字典对象。
+        """
+        if isinstance(file_data, BufferedReader):
+            file_data = file_data.read()
+        elif isinstance(file_data, str):
+            with open(file_data, "rb") as img:
+                file_data = img.read()
+        payload = locals()
+        payload.pop("self", None)
+        payload.pop("img", None)
+        route = Route("POST", "/v2/groups/{group_openid}/files", group_openid=group_openid)
+        return await self._http.request(route, json=payload)
+
     async def recall_message(self, channel_id: str, message_id: str, hidetip: bool = False) -> str:
         """
         撤回消息。
