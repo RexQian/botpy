@@ -17,6 +17,10 @@ class Thumbnail(TypedDict):
 class EmbedField(TypedDict):
     name: str
 
+class Media(TypedDict):
+    file_uuid: str # 文件 ID
+    file_info: str # 文件信息，用于发消息接口的 media 字段使用
+    ttl: int # 有效期，表示剩余多少秒到期，到期后 file_info 失效，当等于 0 时，表示可长期使用
 
 class Embed(TypedDict, total=False):
     title: str  # 标题
@@ -83,6 +87,19 @@ class TypesEnum(Enum):
     after = "after"
     latest = ""
 
+class FileType(Enum):
+    image = 1
+    video = 2
+    audio = 3
+    file = 4
+
+class GroupMessageType(Enum):
+    text = 0
+    text_image = 1
+    markdown = 2
+    ark = 3
+    embed = 4
+    media = 7
 
 class MessagesPager(TypedDict):
     type: TypesEnum

@@ -538,15 +538,17 @@ class BotAPI:
         self,
         group_openid: str,
         content: str = None,
-        embed: message.Embed = None,
-        ark: message.Ark = None,
-        message_reference: message.Reference = None,
-        image: str = None,
-        file_image: Union[bytes, BinaryIO, str] = None,
-        msg_id: str = None,
-        event_id: str = None,
+        msg_type: int = 0,
         markdown: message.MarkdownPayload = None,
         keyboard: message.Keyboard = None,
+        media: message.Media = None,
+        embed: message.Embed = None,
+        ark: message.Ark = None,
+        image: str = None,
+        message_reference: message.Reference = None,
+        event_id: str = None,
+        msg_id: str = None,
+        msg_seq: str = None,
     ) -> message.Message:
         """
         发送消息。
@@ -554,33 +556,28 @@ class BotAPI:
         注意:
         - 发送成功之后，会触发一个创建消息的事件。
         - 被动回复消息有效期为 5 分钟
-        - 主动推送消息每日每个子频道限 2 条
         - 发送消息接口要求机器人接口需要链接到websocket gateway 上保持在线状态
 
         Args:
           group_openid (str): 群聊的 openid
           content (str): 消息的文本内容。
-          embed (message.Embed): embed 消息，一种特殊的 ark
-          ark (message.Ark): ark 模版消息
-          message_reference (message.Reference): 对消息的引用。
-          image (str): 要发送的图像的 URL。
-          file_image (bytes): 要发送的本地图像的本地路径或数据。
-          msg_id (str): 您要回复的消息的 ID。您可以从 AT_CREATE_MESSAGE 事件中获取此 ID。
-          event_id (str): 您要回复的消息的事件 ID。
+          msg_type (int): 消息类型 ：0文本，1图文混排，2是 markdown, 3 ark 消息，4 embed, 7 media 富媒体
           markdown (message.MarkdownPayload): markdown 消息
           keyboard (message.Keyboard): keyboard 消息
+          media (message.Media): media 消息
+          embed (message.Embed): embed 消息，一种特殊的 ark
+          ark (message.Ark): ark 模版消息
+          image (str): 要发送的图像的 URL。
+          message_reference (message.Reference): 对消息的引用。
+          event_id (str): 您要回复的消息的事件 ID。
+          msg_id (str): 您要回复的消息的 ID。您可以从 AT_CREATE_MESSAGE 事件中获取此 ID。
+          msg_seq (str): 回复消息的序号，与 msg_id 联合使用，避免相同消息id回复重复发送，不填默认是 1。相同的 msg_id + msg_seq 重复发送会失败。
 
         Returns:
           message.Message: 一个消息字典对象。
         """
-        if isinstance(file_image, BufferedReader):
-            file_image = file_image.read()
-        elif isinstance(file_image, str):
-            with open(file_image, "rb") as img:
-                file_image = img.read()
         payload = locals()
         payload.pop("self", None)
-        payload.pop("img", None)
         route = Route("POST", "/v2/groups/{group_openid}/messages", group_openid=group_openid)
         return await self._http.request(route, json=payload)
 
@@ -591,7 +588,7 @@ class BotAPI:
         url: str = None,
         srv_send_msg = True,
         file_data: Union[bytes, BinaryIO, str] = None,
-    ) -> message.Message:
+    ) -> message.Media:
         """
         发送文件。
 
@@ -599,7 +596,7 @@ class BotAPI:
           group_openid (str): 群聊的 openid
           file_type (int): 媒体类型：1 图片，2 视频，3 语音，4 文件（暂不开放）资源格式要求图片：png/jpg，视频：mp4，语音：silk
           url (str): 需要发送媒体资源的url
-          srv_send_msg (bool): 固定是：true
+          srv_send_msg (bool): true-主动消息，直接发送到对应场景 false-返回media信息，作为被动消息图片字段
           file_data (bytes): 要发送的本地图像的本地路径或数据。【暂未支持】
         Returns:
           message.Message: 一个消息字典对象。
