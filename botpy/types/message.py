@@ -2,7 +2,7 @@
 from enum import Enum
 from typing import List, TypedDict
 
-from .gateway import MessagePayload
+from .gateway import MessagePayload, GroupMessagePayload
 from .inline import Keyboard
 
 
@@ -80,6 +80,10 @@ class Message(MessagePayload):
     markdown: MarkdownPayload
     keyboard: KeyboardPayload
 
+class GroupMessage(GroupMessagePayload):
+    group_code: str
+    msg: str
+    ret: int
 
 class TypesEnum(Enum):
     around = "around"

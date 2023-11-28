@@ -549,9 +549,9 @@ class BotAPI:
         event_id: str = None,
         msg_id: str = None,
         msg_seq: str = None,
-    ) -> message.Message:
+    ) -> message.GroupMessage:
         """
-        发送消息。
+        发动消息到群。
 
         注意:
         - 发送成功之后，会触发一个创建消息的事件。
@@ -574,7 +574,7 @@ class BotAPI:
           msg_seq (str): 回复消息的序号，与 msg_id 联合使用，避免相同消息id回复重复发送，不填默认是 1。相同的 msg_id + msg_seq 重复发送会失败。
 
         Returns:
-          message.Message: 一个消息字典对象。
+          message.GroupMessage: 一个消息字典对象。
         """
         payload = locals()
         payload.pop("self", None)
@@ -599,7 +599,7 @@ class BotAPI:
           srv_send_msg (bool): true-主动消息，直接发送到对应场景 false-返回media信息，作为被动消息图片字段
           file_data (bytes): 要发送的本地图像的本地路径或数据。【暂未支持】
         Returns:
-          message.Message: 一个消息字典对象。
+          message.Media: 媒体资源。
         """
         if isinstance(file_data, BufferedReader):
             file_data = file_data.read()

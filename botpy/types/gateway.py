@@ -54,8 +54,6 @@ class MessagePayload(TypedDict):
     seq: int
     seq_in_channel: str
     timestamp: str
-    group_id: str
-    group_openid: str
 
 
 class DirectMessagePayload(TypedDict):
@@ -82,3 +80,12 @@ class MessageAuditPayload(TypedDict):
     audit_time: str
     create_time: str
     seq_in_channel: str
+
+class GroupMessagePayload(TypedDict):
+    id: str
+    author: UserPayload
+    content: str
+    timestamp: str
+    group_id: str
+    group_openid: str
+    attachments: List[MessageAttachPayload]

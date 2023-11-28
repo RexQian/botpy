@@ -5,7 +5,7 @@ from typing import List, Callable, Dict, Any, Optional
 from .channel import Channel
 from .guild import Guild
 from .interaction import Interaction
-from .message import Message, DirectMessage, MessageAudit
+from .message import Message, DirectMessage, MessageAudit, GroupMessage
 from .user import Member
 from .reaction import Reaction
 from .audio import Audio, PublicAudio
@@ -162,7 +162,7 @@ class ConnectionState:
 
     # botpy.flags.Intents.group_at_message
     def parse_group_at_message_create(self, payload):
-        _message = Message(self.api, payload.get('id', None), payload.get('d', {}))
+        _message = GroupMessage(self.api, payload.get('id', None), payload.get('d', {}))
         self._dispatch("group_at_message_create", _message)
 
     # botpy.flags.Intents.interaction

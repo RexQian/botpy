@@ -17,9 +17,7 @@ class Message:
         "seq",
         "seq_in_channel",
         "timestamp",
-        "event_id",
-        "group_id",
-        "group_openid"
+        "event_id"
     )
 
     def __init__(self, api: BotAPI, event_id, data: gateway.MessagePayload):
@@ -39,8 +37,6 @@ class Message:
         self.seq_in_channel = data.get("seq_in_channel", None)  # 子频道消息序号
         self.timestamp = data.get("timestamp", None)
         self.event_id = event_id
-        self.group_id = data.get("group_id", None)
-        self.group_openid = data.get("group_openid", None)
 
     def __repr__(self):
         return str({items: str(getattr(self, items)) for items in self.__slots__ if not items.startswith('_')})
@@ -48,7 +44,6 @@ class Message:
     class _User:
         def __init__(self, data):
             self.id = data.get("id", None)
-            self.member_openid = data.get("member_openid", None)
             self.username = data.get("username", None)
             self.bot = data.get("bot", None)
             self.avatar = data.get("avatar", None)
@@ -189,3 +184,51 @@ class MessageAudit:
 
     def __repr__(self):
         return str({items: str(getattr(self, items)) for items in self.__slots__ if not items.startswith('_')})
+
+class GroupMessage:
+    __slots__ = (
+        "_api",
+        "id",
+        "author",
+        "content",
+        "timestamp",
+        "group_id",
+        "group_openid",
+        "attachments"
+    )
+
+    def __init__(self, api: BotAPI, event_id, data: gateway.GroupMessagePayload):
+        self._api = api
+
+        self.id = data.get("id", None)
+        self.author = self._User(data.get("author", {}))
+        self.content = data.get("content", None)
+        self.timestamp = data.get("timestamp", None)
+        self.group_id = data.get("group_id", None)
+        self.group_openid = data.get("group_openid", None)
+        self.attachments = [self._Attachments(items) for items in data.get("attachments", {})]
+
+    def __repr__(self):
+        return str({items: str(getattr(self, items)) for items in self.__slots__ if not items.startswith('_')})
+
+    class _User:
+        def __init__(self, data):
+            self.id = data.get("id", None)
+            self.member_openid = data.get("member_openid", None)
+
+        def __repr__(self):
+            return str(self.__dict__)
+    class _Attachments:
+        def __init__(self, data):
+            self.content_type = data.get("content_type", None)
+            self.filename = data.get("filename", None)
+            self.height = data.get("height", None)
+            self.width = data.get("width", None)
+            self.size = data.get("size", None)
+            self.url = data.get("url", None)
+
+        def __repr__(self):
+            return str(self.__dict__)
+
+    async def reply(self, **kwargs):
+        return await self._api.post_group_message(channel_id=self.channel_id, msg_id=self.id, **kwargs)
