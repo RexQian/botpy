@@ -581,13 +581,13 @@ class BotAPI:
         route = Route("POST", "/v2/groups/{group_openid}/messages", group_openid=group_openid)
         return await self._http.request(route, json=payload)
 
-    async def send_group_file(
+    async def post_group_file(
         self,
         group_openid: str,
         file_type: int,
         url: str = None,
         srv_send_msg = True,
-        file_data: Union[bytes, BinaryIO, str] = None,
+        file_data: str = None,
     ) -> message.Media:
         """
         发送文件。
@@ -597,20 +597,35 @@ class BotAPI:
           file_type (int): 媒体类型：1 图片，2 视频，3 语音，4 文件（暂不开放）资源格式要求图片：png/jpg，视频：mp4，语音：silk
           url (str): 需要发送媒体资源的url
           srv_send_msg (bool): true-主动消息，直接发送到对应场景 false-返回media信息，作为被动消息图片字段
-          file_data (bytes): 要发送的本地图像的本地路径或数据。【暂未支持】
+          file_data (str): 要发送的本地图像的Base64数据。
         Returns:
           message.Media: 媒体资源。
         """
-        if isinstance(file_data, BufferedReader):
-            file_data = file_data.read()
-        elif isinstance(file_data, str):
-            with open(file_data, "rb") as img:
-                file_data = img.read()
         payload = locals()
         payload.pop("self", None)
-        payload.pop("img", None)
         route = Route("POST", "/v2/groups/{group_openid}/files", group_openid=group_openid)
         return await self._http.request(route, json=payload)
+
+    async def recall_group_message(self, group_openid: str, message_id: str) -> str:
+        """
+        撤回群消息。
+
+        用于撤回机器人发送在当前群 group_openid 的消息 message_id，发送超出2分钟的消息不可撤回
+
+        Args:
+          group_openid (str): 群聊的 openid
+          message_id (str): 要撤回的消息的 ID。
+
+        Returns:
+          成功执行返回`None`。
+        """
+        route = Route(
+            "DELETE",
+            "/v2/groups/{group_openid}/messages/{message_id}",
+            group_openid=group_openid,
+            message_id=message_id,
+        )
+        return await self._http.request(route)
 
     async def recall_message(self, channel_id: str, message_id: str, hidetip: bool = False) -> str:
         """
